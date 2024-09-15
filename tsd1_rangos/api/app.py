@@ -10,7 +10,6 @@ import numpy as np
 from collections import defaultdict
 app = Flask(__name__)
 
-# Conexiones a Redis (hasta 8 particiones)
 redis_partitions = [
     redis.StrictRedis(host='redis-part1', port=6379, decode_responses=True),
     redis.StrictRedis(host='redis-part2', port=6379, decode_responses=True),
@@ -26,17 +25,32 @@ grpc_channel = grpc.insecure_channel('grpc-server:50051')
 grpc_stub = dns_pb2_grpc.DNSResolverStub(grpc_channel)
 
 # Variables para métricas
-num_partitions = 2  # Inicialmente con 2 particiones
+
+num_partitions = 1 
 hit_count = 0
 miss_count = 0
 response_times = []
 partition_requests = [0] * 8  # Contador de peticiones por partición
 query_frequency = defaultdict(int)  # Diccionario para contar consultas por dominio
+def get_partition_index(domain_name):
+    # Convertir el dominio a un valor numérico
+    domain_value = sum(ord(c) for c in domain_name)
+    
+    # Asignar a una partición según el rango
+    if num_partitions == 2:
+        return 0 if domain_value % 2 == 0 else 1
+    elif num_partitions == 4:
+        return domain_value % 4
+    elif num_partitions == 8:
+        return domain_value % 8
+    else:
+        raise ValueError('Número de particiones no soportado')
 
 def get_redis_partition(domain_name):
-    partition_index = hash(domain_name) % num_partitions
+    partition_index = get_partition_index(domain_name)
     partition_requests[partition_index] += 1  # Contar peticiones
     return redis_partitions[partition_index]
+    
 
 def resolve_dns(domain_name):
     # Conexión con el servidor gRPC
