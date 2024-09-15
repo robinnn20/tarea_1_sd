@@ -1,0 +1,79 @@
+version: '3'
+services:
+  redis-part1:
+    image: bitnami/redis:latest
+    ports:
+      - "6380:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part2:
+    image: bitnami/redis:latest
+    ports:
+      - "6381:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  # Descomenta estos servicios para 4 o 8 particiones
+  redis-part3:
+    image: bitnami/redis:latest
+    ports:
+      - "6382:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part4:
+    image: bitnami/redis:latest
+    ports:
+      - "6383:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part5:
+    image: bitnami/redis:latest
+    ports:
+      - "6384:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part6:
+    image: bitnami/redis:latest
+    ports:
+      - "6385:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part7:
+    image: bitnami/redis:latest
+    ports:
+      - "6386:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  redis-part8:
+    image: bitnami/redis:latest
+    ports:
+      - "6387:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  grpc-server:
+    build: ./grpc_server
+    ports:
+      - "50051:50051"
+
+  api:
+    build: ./api
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis-part1
+      - redis-part2
+      - grpc-server
+      # Agregar dependencias si se usan más particiones
+      - redis-part3
+      - redis-part4
+      - redis-part5
+      - redis-part6
+      - redis-part7
+      - redis-part8

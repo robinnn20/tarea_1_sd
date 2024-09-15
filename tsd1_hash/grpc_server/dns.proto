@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service DNSResolver {
+    rpc Resolve(DomainRequest) returns (DNSResponse);
+}
+
+message DomainRequest {
+    string domain_name = 1;
+}
+
+message DNSResponse {
+    string ip_address = 1;
+}
