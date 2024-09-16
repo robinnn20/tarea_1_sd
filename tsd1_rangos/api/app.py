@@ -31,12 +31,10 @@ hit_count = 0
 miss_count = 0
 response_times = []
 partition_requests = [0] * 8  # Contador de peticiones por partición
-query_frequency = defaultdict(int)  # Diccionario para contar consultas por dominio
+query_frequency = defaultdict(int)  
 def get_partition_index(domain_name):
-    # Convertir el dominio a un valor numérico
     domain_value = sum(ord(c) for c in domain_name)
     
-    # Asignar a una partición según el rango
     if num_partitions == 2:
         return 0 if domain_value % 2 == 0 else 1
     elif num_partitions == 4:
@@ -48,7 +46,7 @@ def get_partition_index(domain_name):
 
 def get_redis_partition(domain_name):
     partition_index = get_partition_index(domain_name)
-    partition_requests[partition_index] += 1  # Contar peticiones
+    partition_requests[partition_index] += 1  
     return redis_partitions[partition_index]
     
 
@@ -59,7 +57,6 @@ def resolve_dns(domain_name):
         if response.ip_address:
             return response.ip_address
     except grpc.RpcError as e:
-        # Omitir cualquier operación si ocurre un error
         print(f"Error al resolver {domain_name}: {e}")
         return None
 
@@ -83,13 +80,13 @@ def resolve_domain():
     else:
         miss_count += 1
         ip = resolve_dns(domain_name)
-        if ip:  # Si hay una IP válida
+        if ip:  
             partition.setex(domain_name, 360, ip)  # Guardar en Redis con TTL
             status = 'MISS'
         else:
              return '', 204
 
-    end_time = time.time()  # Terminar cronómetro
+    end_time = time.time()  
     response_times.append(end_time - start_time)
 
     return jsonify({'status': status, 'ip': ip})
@@ -113,7 +110,6 @@ def hit_miss_graph():
     hit_rate = hit_count / (hit_count + miss_count) * 100 if (hit_count + miss_count) > 0 else 0
     miss_rate = 100 - hit_rate
 
-    # Gráfico de hit/miss rate
     fig, ax = plt.subplots()
     ax.bar(labels, counts, color=['green', 'red'])
     ax.set_ylabel('Cantidad de Consultas')
@@ -134,7 +130,6 @@ def response_time_graph():
         avg_response_time = 0
         std_response_time = 0
 
-    # Gráfico de tiempos de respuesta (promedio y desviación estándar)
     fig, ax = plt.subplots()
     ax.bar(['Promedio', 'Desviación Estándar'], [avg_response_time, std_response_time], color=['blue', 'orange'])
     ax.set_ylabel('Tiempo (segundos)')
@@ -151,7 +146,6 @@ def load_balance_graph():
     labels = [f'Partición {i+1}' for i in range(num_partitions)]
     counts = partition_requests[:num_partitions]
 
-    # Gráfico de balance de carga
     fig, ax = plt.subplots()
     ax.bar(labels, counts, color='purple')
     ax.set_ylabel('Cantidad de Peticiones')
@@ -164,17 +158,14 @@ def load_balance_graph():
     return Response(img, mimetype='image/png')
 @app.route('/stats/query-frequency-graph', methods=['GET'])
 def query_frequency_graph():
-    # Obtener los datos de frecuencia y ordenarlos
     domains = list(query_frequency.keys())
     frequencies = list(query_frequency.values())
 
-    # Gráfico de distribución de frecuencias
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.barh(domains, frequencies, color='blue')
     ax.set_xlabel('Frecuencia de Consultas')
     ax.set_title('Distribución de Frecuencias de Consultas por Dominio')
-    ax.set_xlim(0, max(frequencies) + 1)  # Asegurar que hay espacio en la gráfica
-
+    ax.set_xlim(0, max(frequencies) + 1)  
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
