@@ -87,10 +87,10 @@ def update_partitions():
     new_partitions = data.get('partitions', 2)
 
     if new_partitions not in [2, 4, 8]:
-        return jsonify({'status': 'error', 'message': 'El número de particiones debe ser 2, 4 o 8'}), 400
+        return jsonify({'status': 'error', 'message': 'El numero de particiones debe ser 2, 4 o 8'}), 400
 
     num_partitions = new_partitions
-    return jsonify({'status': 'success', 'message': f'Número de particiones actualizado a {new_partitions}'})
+    return jsonify({'status': 'success', 'message': f'Numero de particiones actualizado a {new_partitions}'})
 
 @app.route('/stats', methods=['GET'])
 def hit_miss_graph():
@@ -141,7 +141,7 @@ def load_balance_graph():
     fig, ax = plt.subplots()
     ax.bar(labels, counts, color='purple')
     ax.set_ylabel('Cantidad de Peticiones')
-    ax.set_title(f'Balance de Carga por Partición (Total: {num_partitions})')
+    ax.set_title(f'Balance de Carga por Particion (Total: {num_partitions})')
 
     img = io.BytesIO()
     plt.savefig(img, format='png')
