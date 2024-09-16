@@ -26,12 +26,12 @@ grpc_channel = grpc.insecure_channel('grpc-server:50051')
 grpc_stub = dns_pb2_grpc.DNSResolverStub(grpc_channel)
 
 # Variables para métricas
-num_partitions = 2  # Inicialmente con 2 particiones
+num_partitions = 2  
 hit_count = 0
 miss_count = 0
 response_times = []
-partition_requests = [0] * 8  # Contador de peticiones por partición
-query_frequency = defaultdict(int)  # Diccionario para contar consultas por dominio
+partition_requests = [0] * 8  
+query_frequency = defaultdict(int)  
 
 def get_redis_partition(domain_name):
     partition_index = hash(domain_name) % num_partitions
@@ -45,7 +45,6 @@ def resolve_dns(domain_name):
         if response.ip_address:
             return response.ip_address
     except grpc.RpcError as e:
-        # Omitir cualquier operación si ocurre un error
         print(f"Error al resolver {domain_name}: {e}")
         return None
 
@@ -56,7 +55,7 @@ def resolve_domain():
     partition = get_redis_partition(domain_name)
 
 
-    start_time = time.time()  # Iniciar el cronómetro para tiempos de respuesta
+    start_time = time.time() 
 
     query_frequency[domain_name] += 1
     
@@ -69,13 +68,13 @@ def resolve_domain():
     else:
         miss_count += 1
         ip = resolve_dns(domain_name)
-        if ip:  # Si hay una IP válida
+        if ip:  
             partition.setex(domain_name, 360, ip)  # Guardar en Redis con TTL
             status = 'MISS'
         else:
              return '', 204
 
-    end_time = time.time()  # Terminar cronómetro
+    end_time = time.time()  
     response_times.append(end_time - start_time)
 
     return jsonify({'status': status, 'ip': ip})
@@ -150,16 +149,14 @@ def load_balance_graph():
     return Response(img, mimetype='image/png')
 @app.route('/stats/query-frequency-graph', methods=['GET'])
 def query_frequency_graph():
-    # Obtener los datos de frecuencia y ordenarlos
     domains = list(query_frequency.keys())
     frequencies = list(query_frequency.values())
 
-    # Gráfico de distribución de frecuencias
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.barh(domains, frequencies, color='blue')
     ax.set_xlabel('Frecuencia de Consultas')
     ax.set_title('Distribución de Frecuencias de Consultas por Dominio')
-    ax.set_xlim(0, max(frequencies) + 1)  # Asegurar que hay espacio en la gráfica
+    ax.set_xlim(0, max(frequencies) + 1) 
 
     img = io.BytesIO()
     plt.savefig(img, format='png')
