@@ -26,7 +26,7 @@ grpc_stub = dns_pb2_grpc.DNSResolverStub(grpc_channel)
 
 # Variables para métricas
 
-num_partitions = 1 
+num_partitions = 2
 hit_count = 0
 miss_count = 0
 response_times = []
