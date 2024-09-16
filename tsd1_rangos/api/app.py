@@ -44,7 +44,7 @@ def get_partition_index(domain_name):
     elif num_partitions == 8:
         return domain_value % 8
     else:
-        raise ValueError('Número de particiones no soportado')
+        raise ValueError('Numero de particiones no soportado')
 
 def get_redis_partition(domain_name):
     partition_index = get_partition_index(domain_name)
@@ -101,10 +101,10 @@ def update_partitions():
     new_partitions = data.get('partitions', 2)
 
     if new_partitions not in [2, 4, 8]:
-        return jsonify({'status': 'error', 'message': 'El número de particiones debe ser 2, 4 o 8'}), 400
+        return jsonify({'status': 'error', 'message': 'El numero de particiones debe ser 2, 4 o 8'}), 400
 
     num_partitions = new_partitions
-    return jsonify({'status': 'success', 'message': f'Número de particiones actualizado a {new_partitions}'})
+    return jsonify({'status': 'success', 'message': f'Numero de particiones actualizado a {new_partitions}'})
 
 @app.route('/stats', methods=['GET'])
 def hit_miss_graph():
